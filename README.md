@@ -11,4 +11,4 @@ Need to be Added
 1. Overtime
 2. Graceperiod
 3. Salary Calculator
-4. DeductionsA
+4. Deductions

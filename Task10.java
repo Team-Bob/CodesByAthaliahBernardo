@@ -71,6 +71,7 @@ public class Task10 {
                     if (employeeNumberCell == null) continue; // Skip if no Employee Number
                     
                     int employeeNumber = (int)employeeNumberCell.getNumericCellValue();
+                    if (employeeNumber != employeeNumberInput) continue;
                 
                     
                 // Get the other details

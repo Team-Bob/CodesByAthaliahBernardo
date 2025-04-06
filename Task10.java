@@ -1,0 +1,279 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.cp1.payrollsystemformotorph;
+
+
+//Imports for handling excel, input, date and time formatting
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Scanner;
+import java.util.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.LocalDate;
+
+/**
+ *
+ * @author athaliah
+ */
+
+public class Task10 {
+    
+// Task 10 : Read Input from a Text File
+// Automatic Employee Data Presentation    
+// Need on MS 2 
+// Collaborating here some of the Task 9 Codes    
+    
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+         DecimalFormat df = new DecimalFormat("₱#,##0.00");
+        
+    // For User input
+        System.out.print("Enter Employee Number: ");
+        int employeeNumberInput = s.nextInt();
+
+        
+    // Inserting the Database
+    
+       String filePath = "src//MotorPH Employee Data .xlsx";
+        Map<String, String[]> employeeData = getEmployeeDetails(filePath,employeeNumberInput);
+        Map<String, Map<String,Double>> weeklyHours = getWorkHoursPerWeek(filePath);
+        displayEmployeeWorkHours(employeeData, weeklyHours);
+    }
+        public static Map<String, String[]> getEmployeeDetails(String filePath, int employeeNumberInput) {
+        Map<String,String[]> employeeData = new LinkedHashMap<>();
+        try( FileInputStream fis = new FileInputStream(new File(filePath));
+            Workbook workbook = new XSSFWorkbook(fis)) {
+
+
+        //Get the sheet name "Employee Details"
+            Sheet sheet = workbook.getSheet("Employee Details");
+            
+            //Check if the sheet exists
+            if (sheet == null) {
+                System.out.println("Sheet Not Found!");
+                return employeeData;
+}
+            // Loop through each row in the sheet
+            for (Row row: sheet) {
+                if(row.getRowNum()== 0) continue; // just skipping the header
+                
+                //Get cells value
+                Cell employeeNumberCell = row.getCell(0);
+                    if (employeeNumberCell == null) continue; // Skip if no Employee Number
+                    
+                    int employeeNumber = (int)employeeNumberCell.getNumericCellValue();
+                
+                    
+                // Get the other details
+                Cell employeeFirstNameCell = row.getCell(2);
+                Cell employeeLastNameCell = row.getCell(1);
+                Cell employeeBirthdayCell = row.getCell(3);
+                Cell employeePositionCell = row.getCell(11);
+                Cell employeeStatusCell = row.getCell(10); 
+                Cell basicSalaryCell = row.getCell(13);
+                Cell hourlyRateCell = row.getCell(18);
+                
+            
+            //Extract Employee Details
+            String employeeFirstName = employeeFirstNameCell.getStringCellValue();
+            String employeeLastName = employeeLastNameCell.getStringCellValue();
+            String employeeBirthday = formatDateCell(employeeBirthdayCell);
+            String employeePosition = employeePositionCell.getStringCellValue();
+            String employeeStatus = employeeStatusCell.getStringCellValue();
+            int basicSalary = (int)basicSalaryCell.getNumericCellValue();
+            int hourlyRate = (int)hourlyRateCell.getNumericCellValue();
+
+        // Displaying Employee Details  
+            System.out.println("");
+            System.out.println("===================================================");
+            System.out.println(" Welcome to Motor PH Payroll System! ");
+            System.out.println("---------------------------------------------------");
+            System.out.println("Employee Number      : " + employeeNumber);
+            System.out.println("Employee Name        : " + employeeFirstName+" "+ employeeLastName);
+            System.out.println("Birthday             : " + employeeBirthday);
+            System.out.println("---------------------------------------------------");
+            System.out.println("Position             : " + employeePosition);
+            System.out.println("Status               : " + employeeStatus);
+            System.out.println("Hourly Rate          : ₱ " + hourlyRate);
+            System.out.println("Basic Salary         : ₱ " + basicSalary);
+            System.out.println("");
+            System.out.println("---------------- Weekly Attendace ------------------");
+
+            employeeData.put(String.valueOf(employeeNumber), new String[] {
+            employeeFirstName,
+            employeeLastName,
+            employeeBirthday,
+            employeePosition,
+            employeeStatus,
+            String.valueOf(basicSalary),
+            String.valueOf(hourlyRate)
+        });
+    
+            break;
+            }
+   
+        }   catch (IOException e) {
+                System.out.println("Error Reading File: " + e.getMessage());
+            }
+              return employeeData;
+    }
+         // Method to formate the date cells 
+            private static String formatDateCell (Cell cell) {
+                if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+                SimpleDateFormat sdf = new SimpleDateFormat ("MM/dd/yyyy"); // Format the date
+                return sdf.format(cell.getDateCellValue());
+         } else if (cell.getCellType() == CellType.STRING) {
+            return cell.getStringCellValue(); //Return as a string if not numeric
+        } else { 
+            return "Unknown Date Format";
+        }
+    }
+
+
+            
+    // Inserting the Database for the Attendance Record
+        public static Map<String,Map<String, Double>> getWorkHoursPerWeek(String filePath) {
+            Map<String,Map<String, Double>> weeklyHours = new HashMap<>();
+           try(FileInputStream fis = new FileInputStream(new File(filePath));
+                Workbook workbook = new XSSFWorkbook(fis)) {
+
+                Sheet sheet = workbook.getSheet("Attendance Record");
+                    if (sheet == null) {
+                        System.out.println("Attendance Record Sheet not found!");
+                        return weeklyHours;
+                    }
+        
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM-dd-yyyy",
+            Locale.ENGLISH);
+
+                for(Row row: sheet) {
+                    if(row.getRowNum()== 0) continue; // Skip Header Row
+                
+                Cell employeeNumberCell = row.getCell(0);
+                Cell dateCell = row.getCell(3);
+                Cell logInCell = row.getCell (4);
+                Cell logOutCell = row.getCell(5);
+                
+            if (employeeNumberCell == null || dateCell == null || logInCell == null || logOutCell == null) {
+                continue;
+            }
+
+            String employeeNumber = getCellValueAsString(employeeNumberCell);
+            LocalDate date = getCellDateValue(dateCell);
+            String weekStart = date.with(DayOfWeek.MONDAY).format(dateFormatter);
+            String weekEnd = date.with(DayOfWeek.FRIDAY).format(dateFormatter);
+            String weekRange = "Week of " + weekStart+ " to "+ weekEnd;
+            
+            
+                double hoursWorked = calculatedWorkHours(logInCell, logOutCell);
+                
+                weeklyHours.putIfAbsent(employeeNumber, new LinkedHashMap<>());
+                weeklyHours.get(employeeNumber).merge(weekRange, hoursWorked, Double::sum);
+            }
+        }
+            catch(IOException e) {
+                System.out.println("Error Reading Attendance Record: " + e. getMessage());
+            }
+            return weeklyHours;
+        }
+
+        public static void displayEmployeeWorkHours(Map<String, String[]> employeeData,
+            Map <String,Map<String,Double>> weeklyHours) {
+                for (String employeeNumber: employeeData.keySet()) {
+                    String[] details = employeeData.get(employeeNumber);
+
+            
+            if (weeklyHours.containsKey(employeeNumber)) {
+               for (Map.Entry <String, Double> weekEntry:
+                    weeklyHours.get(employeeNumber).entrySet()) {
+                   
+                   System.out.println(weekEntry.getKey());
+                   System.out.println("Total Hours Worked: " + weekEntry.getValue());
+               }
+            }
+            
+                   System.out.println("---------------------------------------------------");
+
+                }
+            }
+                
+                private static String getCellValueAsString(Cell cell) {
+                    if (cell.getCellType() == CellType.NUMERIC){
+                        return String.valueOf((int) cell.getNumericCellValue());
+                    } else {
+                        return cell.getStringCellValue();
+                    }
+                }
+                    
+                private static LocalDate getCellDateValue (Cell cell) {
+                    if (cell.getCellType() == CellType.NUMERIC){
+                        return cell.getDateCellValue().toInstant().atZone(ZoneId.systemDefault())
+                                .toLocalDate();
+                    } else {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyy");
+                        return LocalDate.parse(cell.getStringCellValue(),formatter);
+                    }
+                }
+                
+                private static double calculatedWorkHours(Cell logInCell, Cell logOutCell) {
+                    try {
+                        double logInTime = getTimeAsNumeric(logInCell);
+                        double logOutTime = getTimeAsNumeric(logOutCell);
+                        return (logOutTime - logInTime) * 24; // Convert fraction of days to hours
+                        } catch (Exception e) {
+                            System.out.println("Error pasing work hours." + e.getMessage());
+                            return 0;
+                        }
+                    }
+                
+                private static double getTimeAsNumeric (Cell cell) {
+                 try {
+                    if (cell .getCellType()== CellType.NUMERIC){
+                        return cell.getNumericCellValue();
+                    } else {
+                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                        Date date = sdf.parse(cell.getStringCellValue());
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(date);
+                        return(cal.get(Calendar.HOUR_OF_DAY) + cal.get(Calendar.MINUTE) / 60.0 +  cal.get(Calendar.SECOND)/ 3600.0) / 24.0;
+                    }
+                } catch (Exception e ) {
+                     System.out.println("Error pasing time :"  + e.getMessage());
+                     return 0;
+        }
+    }
+}
+            
+
+            
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+ 
+
+
+
+            
+
+       

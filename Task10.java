@@ -109,6 +109,7 @@ public class Task10 {
             System.out.println("");
             System.out.println("---------------- Weekly Attendace ------------------");
 
+            // Storing data for later use on the attendance records
             employeeData.put(String.valueOf(employeeNumber), new String[] {
             employeeFirstName,
             employeeLastName,
@@ -119,9 +120,8 @@ public class Task10 {
             String.valueOf(hourlyRate)
         });
     
-            break;
-            }
-   
+            
+    }
         }   catch (IOException e) {
                 System.out.println("Error Reading File: " + e.getMessage());
             }

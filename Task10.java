@@ -34,7 +34,8 @@ public class Task10 {
 // Need on MS 2 
 // Collaborating here some of the Task 9 Codes 
 // Used the demo of Sir Aldrin as guide in making this and 
-// Youtube videos, W3schools and Programiz   
+// Youtube videos, W3schools and  Programiz
+
     
     public static void main(String[] args) {
         Scanner s = new Scanner(System.in);
@@ -410,16 +411,16 @@ public class Task10 {
                     for (Row row : sheet) {
                         if (row.getRowNum() == 0) continue;
 
-                        Cell empNumberCell = row.getCell(0);
+                        Cell employeeNumberCell = row.getCell(0);
                         Cell dateCell = row.getCell(3);
                         Cell loginCell = row.getCell(4);
 
-                        if (empNumberCell == null || dateCell == null || loginCell == null) continue;
+                        if (employeeNumberCell == null || dateCell == null || loginCell == null) continue;
 
-                        String empNum = getCellValueAsString(empNumberCell);
+                        String empNumber = getCellValueAsString(employeeNumberCell);
                         LocalDate attendanceDate = getCellDateValue(dateCell);
 
-                        if (empNum.equals(employeeNumber) && attendanceDate.equals(date)) {
+                        if (employeeNumber.equals(employeeNumber) && attendanceDate.equals(date)) {
                             return getTimeAsLocalTime(loginCell);
                         }
                     }

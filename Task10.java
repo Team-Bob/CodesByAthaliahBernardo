@@ -32,7 +32,9 @@ public class Task10 {
 // Task 10 : Read Input from a Text File
 // Automatic Employee Data Presentation    
 // Need on MS 2 
-// Collaborating here some of the Task 9 Codes    
+// Collaborating here some of the Task 9 Codes 
+// Used the demo of Sir Aldrin as guide in making this and 
+// Youtube videos, W3schools and Programiz   
     
     public static void main(String[] args) {
         Scanner s = new Scanner(System.in);
